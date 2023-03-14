@@ -1,1 +1,4 @@
-# English-Chinese-translate-machine
+# English to Chinese translate machine
+
+## Dataset from tatoeba.org
+- sentence pairs of english and chinese
