@@ -25,10 +25,9 @@ def training(encoder, decoder, n_iter, print_every):
     _, _, pairs = readLangs('eng', 'cha', reverse=False)
     training_pairs = [tensorFromPair(random.choice(pairs))
                       for i in range(n_iter)]
-
+    # print(training_pairs)
     for iter in range(1, n_iter+1):
-        # random.shuffle(pairs)
-        training_pair = training_pairs[n_iter-1]
+        training_pair = training_pairs[iter-1]
         # print(training_pair)
         input_tensor = training_pair[0]
         target_tensor = training_pair[1]
@@ -45,9 +44,6 @@ def training(encoder, decoder, n_iter, print_every):
             start = time.ctime(seconds)
             print('iter:\t%d\tpercentage:\t%d%%\tloss:\t%.8f' %
                   (iter, iter/n_iter*100, print_loss_avg))
-
-    torch.save(encoder, 'dataset/model/encoder.pt')
-    torch.save(decoder, 'dataset/model/decoder.pt')
 
     return plot_losses, iter_total
 
@@ -109,9 +105,13 @@ def evaluateRandomly(encoder, decoder, n):
 
 if __name__ == '__main__':
     _, _, _, encoder, decoder = optimizer()
+
     encoder = torch.load('dataset/model/encoder.pt')
     decoder = torch.load('dataset/model/decoder.pt')
     plot_loss, iter = training(encoder, decoder, n_iter=100, print_every=10)
+    torch.save(encoder, 'dataset/model/encoder.pt')
+    torch.save(decoder, 'dataset/model/decoder.pt')
+
     encoder = torch.load('dataset/model/encoder.pt')
     decoder = torch.load('dataset/model/decoder.pt')
     evaluateRandomly(encoder, decoder, 1)
