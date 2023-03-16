@@ -1,10 +1,11 @@
 import unicodedata
 import re
 import torch
-MAX_LENGTH = 5
+import random
+MAX_LENGTH = 10
 device = torch.device('cpu')
-input_lang = 'eng'
-output_lang = 'cha'
+in_lang = 'eng'
+out_lang = 'cha'
 
 eng_prefixes = (
     "i am ", "i m ",
@@ -92,7 +93,7 @@ def readLangs(lang1, lang2, reverse=False):
 
 def indexesFromSentence(lang, sentence):
 
-    return [lang.word2index[word] for word in sentence.split()]
+    return [lang.word2index[word] for word in sentence.split(' ')]
 
 
 def tensorFromSentence(lang, sentence):
@@ -101,15 +102,13 @@ def tensorFromSentence(lang, sentence):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
-def tensorFromPair(pair):
-    input_lang, output_lang, _ = readLangs('eng', 'cha')
+input_lang, output_lang, _ = readLangs('eng', 'cha', reverse=False)
 
-    eng = [i[0] for i in pair]
-    cha = [i[1] for i in pair]
-    eng = ' '.join(eng)
-    cha = ' '.join(cha)
-    input_tensor = tensorFromSentence(input_lang, eng)
-    output_tensor = tensorFromSentence(output_lang, cha)
+
+def tensorFromPair(pair):
+
+    input_tensor = tensorFromSentence(input_lang, pair[0])
+    output_tensor = tensorFromSentence(output_lang, pair[1])
 
     return (input_tensor, output_tensor)
 
@@ -117,4 +116,7 @@ def tensorFromPair(pair):
 if __name__ == '__main__':
     in_lang, out_lang, pairs = readLangs('eng', 'cha', reverse=False)
     print(len(pairs))
-    print(tensorFromPair(pairs))
+    print(pairs[10])
+    print(tensorFromPair(pairs[10]))
+    a = [tensorFromPair(random.choice(pairs)) for i in range(5)]
+    print(a[4])

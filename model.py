@@ -4,7 +4,7 @@ from read_data import *
 import random
 from torch import optim
 
-MAX_LENGTH = 5
+MAX_LENGTH = 10
 device = torch.device('cpu')
 
 
