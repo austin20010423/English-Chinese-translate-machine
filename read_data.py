@@ -2,10 +2,10 @@ import unicodedata
 import re
 import torch
 import random
-MAX_LENGTH = 10
+MAX_LENGTH = 6
 device = torch.device('cpu')
 in_lang = 'eng'
-out_lang = 'cha'
+out_lang = 'fre'
 
 eng_prefixes = (
     "i am ", "i m ",
@@ -23,7 +23,7 @@ def unicodeToAscii(s):
 
 def normalizeString(s):
     s = unicodeToAscii(s.lower().strip())
-    s = re.sub("[.!?。？！]", "\1", s)
+    s = re.sub("[.!?]", " \1", s)
     s = re.sub(r"[0-9]+", r" ", s)
     return s
 
@@ -93,7 +93,7 @@ def readLangs(lang1, lang2, reverse=False):
 
 def indexesFromSentence(lang, sentence):
 
-    return [lang.word2index[word] for word in sentence.split(' ')]
+    return [lang.word2index[word] for word in sentence.split()]
 
 
 def tensorFromSentence(lang, sentence):
@@ -102,7 +102,7 @@ def tensorFromSentence(lang, sentence):
     return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
 
 
-input_lang, output_lang, _ = readLangs('eng', 'cha', reverse=False)
+input_lang, output_lang, _ = readLangs('eng', 'fre', reverse=False)
 
 
 def tensorFromPair(pair):
@@ -114,9 +114,10 @@ def tensorFromPair(pair):
 
 
 if __name__ == '__main__':
-    in_lang, out_lang, pairs = readLangs('eng', 'cha', reverse=False)
+    in_lang, out_lang, pairs = readLangs('eng', 'fre', reverse=False)
     print(len(pairs))
-    print(pairs[10])
-    print(tensorFromPair(pairs[10]))
-    a = [tensorFromPair(random.choice(pairs)) for i in range(5)]
-    print(a[4])
+    print(pairs[0])
+
+    print(tensorFromPair(pairs[1]))
+    a = [tensorFromPair(pairs[i]) for i in range(20)]
+    print(a)

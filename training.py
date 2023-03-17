@@ -7,7 +7,7 @@ import time
 import matplotlib.pyplot as plt
 # plt.switch_backend('agg')
 device = torch.device('cpu')
-MAX_LENGTH = 10
+MAX_LENGTH = 6
 '''
 def timeSince(start):
     seconds = time.time()
@@ -22,16 +22,16 @@ def training(encoder, decoder, n_iter, print_every):
     plot_loss_total = 0
     iter_total = []
     plot_losses = []
-    _, _, pairs = readLangs('eng', 'cha', reverse=False)
-    training_pairs = [tensorFromPair(random.choice(pairs))
+    _, _, pairs = readLangs('eng', 'fre', reverse=False)
+    training_pairs = [tensorFromPair(pairs[i])
                       for i in range(n_iter)]
-    # print(training_pairs)
+    print(training_pairs)
     for iter in range(1, n_iter+1):
         training_pair = training_pairs[iter-1]
         # print(training_pair)
         input_tensor = training_pair[0]
         target_tensor = training_pair[1]
-        loss = train(input_tensor, target_tensor)
+        loss = train(encoder, decoder, input_tensor, target_tensor)
         print_loss_total += loss
         plot_loss_total += loss
 
@@ -60,7 +60,7 @@ def showPlot(iter, points):
 
 def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 
-    in_lang, out_lang, _ = readLangs('eng', 'cha', reverse=False)
+    in_lang, out_lang, _ = readLangs('eng', 'fre', reverse=False)
     eng = sentence[0]
     inputs = tensorFromSentence(in_lang, eng)
     input_length = inputs.size()[0]
@@ -92,7 +92,7 @@ def evaluate(encoder, decoder, sentence, max_length=MAX_LENGTH):
 
 
 def evaluateRandomly(encoder, decoder, n):
-    _, _, pairs = readLangs('eng', 'cha', reverse=False)
+    _, _, pairs = readLangs('eng', 'fre', reverse=False)
     for i in range(0, n):
         pair = random.choice(pairs)
         print('source: ', pair[0])
@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
     encoder = torch.load('dataset/model/encoder.pt')
     decoder = torch.load('dataset/model/decoder.pt')
-    plot_loss, iter = training(encoder, decoder, n_iter=100, print_every=10)
+    plot_loss, iter = training(encoder, decoder, n_iter=60, print_every=5)
     torch.save(encoder, 'dataset/model/encoder.pt')
     torch.save(decoder, 'dataset/model/decoder.pt')
 

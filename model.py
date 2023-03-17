@@ -4,7 +4,7 @@ from read_data import *
 import random
 from torch import optim
 
-MAX_LENGTH = 10
+MAX_LENGTH = 6
 device = torch.device('cpu')
 
 
@@ -66,13 +66,13 @@ class AttnDecoderRNN(nn.Module):
 
 def optimizer():
     # optimize and compile
-    input_lang, output_lang, pairs = readLangs('eng', 'cha', reverse=False)
+    input_lang, output_lang, pairs = readLangs('eng', 'fre', reverse=False)
 
     # SGD optimizer
     encoder = EncoderRNN(input_lang.n_words, 256)
     decoder = AttnDecoderRNN(256, output_lang.n_words)
 
-    learning_rate = 0.001
+    learning_rate = 0.01
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
     decoder_optimizer = optim.SGD(decoder.parameters(), lr=learning_rate)
 
@@ -81,13 +81,13 @@ def optimizer():
     return encoder_optimizer, decoder_optimizer, criterion, encoder, decoder
 
 
-teacher_forcing_ratio = 0.5
+teacher_forcing_ratio = 0.7
 SOS_token = 0
 EOS_token = 1
 
 
-def train(input_tensor, target_tensor):
-    encoder_optimizer, decoder_optimizer, criterion, encoder, decoder = optimizer()
+def train(encoder, decoder, input_tensor, target_tensor):
+    encoder_optimizer, decoder_optimizer, criterion, _, _ = optimizer()
     encoder_hidden = encoder.initHidden()
     encoder_optimizer.zero_grad()
     decoder_optimizer.zero_grad()
@@ -102,8 +102,9 @@ def train(input_tensor, target_tensor):
 
     # encoder in
     for ei in range(input_length):
-        _, encoder_hidden = encoder(input_tensor[ei], encoder_hidden)
-
+        encoder_output, encoder_hidden = encoder(
+            input_tensor[ei], encoder_hidden)
+        encoder_outputs[ei] = encoder_output[0, 0]
     # decoder calculate
     decoder_input = torch.tensor([SOS_token], device=device)
     decoder_hidden = encoder_hidden
@@ -113,7 +114,8 @@ def train(input_tensor, target_tensor):
         use_teacher_forcing = True
     else:
         use_teacher_forcing = False
-
+    # print(random.random())
+    # print(use_teacher_forcing)
     if use_teacher_forcing:
         for di in range(target_length):
             decoder_output, decoder_hidden, decoder_attention = decoder(
@@ -140,12 +142,12 @@ def train(input_tensor, target_tensor):
 
 
 if __name__ == '__main__':
-    in_lang, out_lang, pair = readLangs('eng', 'cha', reverse=False)
-
-    for i in range(0, 2):
-        pairs = tensorFromPair(pair)
+    in_lang, out_lang, pair = readLangs('eng', 'fre', reverse=False)
+    encoder_optimizer, decoder_optimizer, criterion, encoder, decoder = optimizer()
+    for i in range(0, 30):
+        pairs = tensorFromPair(pair[i])
         input = pairs[0]
         output = pairs[1]
 
-        loss = train(input, output)
-        print(loss)
+        loss = train(encoder, decoder, input, output)
+        print('loss:', loss)
