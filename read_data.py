@@ -2,7 +2,7 @@ import unicodedata
 import re
 import torch
 import random
-MAX_LENGTH = 6
+MAX_LENGTH = 7
 device = torch.device('cpu')
 in_lang = 'eng'
 out_lang = 'fre'
@@ -116,8 +116,10 @@ def tensorFromPair(pair):
 if __name__ == '__main__':
     in_lang, out_lang, pairs = readLangs('eng', 'fre', reverse=False)
     print(len(pairs))
-    print(pairs[0])
+    # print(random.choice(pairs))
+    print(tensorFromPair(random.choice(pairs)))
 
-    print(tensorFromPair(pairs[1]))
-    a = [tensorFromPair(pairs[i]) for i in range(20)]
-    print(a)
+    # print(tensorFromPair(pairs[1]))
+    # a = [tensorFromPair(pairs[i])
+    # for i in range(10)]
+    # print(a)

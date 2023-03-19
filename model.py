@@ -4,7 +4,7 @@ from read_data import *
 import random
 from torch import optim
 
-MAX_LENGTH = 6
+MAX_LENGTH = 7
 device = torch.device('cpu')
 
 
@@ -12,8 +12,8 @@ class EncoderRNN(nn.Module):
     def __init__(self, input_size, hidden_size):
         super(EncoderRNN, self).__init__()
         self.hidden_size = hidden_size
-        self.embedding = nn.Embedding(input_size, hidden_size, device=device)
-        self.gru = nn.GRU(hidden_size, hidden_size, device=device)
+        self.embedding = nn.Embedding(input_size, hidden_size).to(device)
+        self.gru = nn.GRU(hidden_size, hidden_size)
 
     def forward(self, input, hidden):
         embedded = self.embedding(input).view(1, 1, -1)
@@ -34,14 +34,14 @@ class AttnDecoderRNN(nn.Module):
         self.max_length = max_length
 
         self.embedding = nn.Embedding(
-            self.output_size, self.hidden_size, device=device)
+            self.output_size, self.hidden_size).to(device)
         self.attn = nn.Linear(self.hidden_size*2,
-                              self.max_length, device=device)
+                              self.max_length)
         self.attn_combine = nn.Linear(
-            self.hidden_size*2, self.hidden_size, device=device)
+            self.hidden_size*2, self.hidden_size)
         self.dropout = nn.Dropout(self.dropout_p)
-        self.gru = nn.GRU(self.hidden_size, self.hidden_size, device=device)
-        self.out = nn.Linear(self.hidden_size, self.output_size, device=device)
+        self.gru = nn.GRU(self.hidden_size, self.hidden_size)
+        self.out = nn.Linear(self.hidden_size, self.output_size)
 
     def forward(self, input, hidden, encoder_outputs):
         embedded = self.embedding(input).view(1, 1, -1)
@@ -69,8 +69,8 @@ def optimizer():
     input_lang, output_lang, pairs = readLangs('eng', 'fre', reverse=False)
 
     # SGD optimizer
-    encoder = EncoderRNN(input_lang.n_words, 256)
-    decoder = AttnDecoderRNN(256, output_lang.n_words)
+    encoder = EncoderRNN(input_lang.n_words, 256).to(device)
+    decoder = AttnDecoderRNN(256, output_lang.n_words).to(device)
 
     learning_rate = 0.01
     encoder_optimizer = optim.SGD(encoder.parameters(), lr=learning_rate)
